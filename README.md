@@ -2,6 +2,8 @@
 
 A real-time SMS-based quiz game built with Django and Africa's Talking that updates a leaderboard in real-time. Players answer questions via SMS and earn points, streaks, and badges!
 
+*Part of the gamifications project - learning through gaming*
+
 ## 🚀 Features
 
 - **Two-way SMS Integration** via Africa's Talking API
