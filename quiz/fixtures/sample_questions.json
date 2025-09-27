@@ -1,0 +1,62 @@
+[
+  {
+    "model": "quiz.question",
+    "pk": 1,
+    "fields": {
+      "text": "What is the capital of Kenya?",
+      "correct_answer": "NAIROBI",
+      "options": ["Nairobi", "Mombasa", "Kisumu", "Eldoret"],
+      "difficulty_level": 1
+    }
+  },
+  {
+    "model": "quiz.question",
+    "pk": 2,
+    "fields": {
+      "text": "Which planet is known as the Red Planet?",
+      "correct_answer": "MARS",
+      "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+      "difficulty_level": 1
+    }
+  },
+  {
+    "model": "quiz.question",
+    "pk": 3,
+    "fields": {
+      "text": "What is 15 + 27?",
+      "correct_answer": "42",
+      "options": ["40", "41", "42", "43"],
+      "difficulty_level": 1
+    }
+  },
+  {
+    "model": "quiz.question",
+    "pk": 4,
+    "fields": {
+      "text": "Who wrote the book \"Things Fall Apart\"?",
+      "correct_answer": "CHINUA ACHEBE",
+      "options": ["Chinua Achebe", "Wole Soyinka", "Ngugi wa Thiongo", "Chimamanda Adichie"],
+      "difficulty_level": 2
+    }
+  },
+  {
+    "model": "quiz.question",
+    "pk": 5,
+    "fields": {
+      "text": "What is the largest mammal in the world?",
+      "correct_answer": "BLUE WHALE",
+      "options": ["Elephant", "Blue Whale", "Giraffe", "Rhinoceros"],
+      "difficulty_level": 1
+    }
+  },
+  {
+    "model": "quiz.question",
+    "pk": 6,
+    "fields": {
+      "text": "In which year did Kenya gain independence?",
+      "correct_answer": "1963",
+      "options": ["1960", "1963", "1965", "1970"],
+      "difficulty_level": 2
+    }
+  }
+]
