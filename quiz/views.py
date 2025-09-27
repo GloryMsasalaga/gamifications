@@ -8,6 +8,25 @@ import africastalking
 from .models import User, Question
 
 
+def index(request):
+    """
+    Main landing page with game overview and analytics
+    """
+    # Get some basic stats for the landing page
+    total_users = User.objects.count()
+    total_questions = Question.objects.count()
+    
+    # Get top performers for showcase
+    top_users = User.objects.order_by('-score')[:3]
+    
+    context = {
+        'total_users': total_users,
+        'total_questions': total_questions,
+        'top_users': top_users,
+    }
+    return render(request, 'quiz/index.html', context)
+
+
 # Initialize Africa's Talking SMS only
 def get_sms_service():
     """Initialize SMS service safely"""
