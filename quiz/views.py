@@ -8,9 +8,15 @@ import africastalking
 from .models import User, Question
 
 
-# Initialize Africa's Talking
-africastalking.initialize(settings.AT_USERNAME, settings.AT_API_KEY)
-sms = africastalking.SMS
+# Initialize Africa's Talking SMS only
+def get_sms_service():
+    """Initialize SMS service safely"""
+    try:
+        africastalking.initialize(settings.AT_USERNAME, settings.AT_API_KEY)
+        return africastalking.SMS
+    except Exception as e:
+        print(f"Warning: Africa's Talking initialization error: {e}")
+        return None
 
 
 def process_answer(phone_number, message_text):
@@ -24,6 +30,49 @@ def process_answer(phone_number, message_text):
         defaults={'score': 0, 'streak': 0, 'current_question_id': 1}
     )
     
+    # Handle special commands
+    command = message_text.strip().upper()
+    
+    if command in ['START', 'QUIZ', 'BEGIN']:
+        # Reset user to first question and show welcome
+        user.current_question_id = 1
+        user.save()
+        question = Question.objects.first()
+        if question:
+            response = f"🎮 Welcome to EduGame Quiz!\n\nQ1: {question.text}"
+            if question.options:
+                response += f"\n{question.get_options_text()}"
+                response += "\n\nReply with A, B, C, or D!"
+            return user, response, False
+        else:
+            return user, "No questions available.", False
+    
+    elif command in ['CURRENT', 'STATUS', 'SCORE']:
+        # Show current question and user stats
+        try:
+            question = Question.objects.get(id=user.current_question_id)
+            response_parts = [
+                f"📊 Your Stats:",
+                f"Score: {user.score}",
+                f"Streak: {user.streak}",
+                f"Badges: {user.badges or 'None yet'}"
+            ]
+            if user.badges:
+                response_parts.append(f"Badges: {user.badges}")
+            
+            response_parts.extend([
+                f"\n📝 Current Question:",
+                question.text
+            ])
+            
+            if question.options:
+                response_parts.append(question.get_options_text())
+                response_parts.append("\nReply with A, B, C, or D!")
+                
+            return user, "\n".join(response_parts), False
+        except Question.DoesNotExist:
+            return user, "No more questions available. Send START to begin again.", False
+    
     # Get current question for this user
     try:
         question = Question.objects.get(id=user.current_question_id)
@@ -34,10 +83,21 @@ def process_answer(phone_number, message_text):
             return user, "No questions available. Please contact administrator.", False
         user.current_question_id = question.id
     
-    # Check if answer is correct (case-insensitive)
+    # Check if answer is correct (supports both letter choices A,B,C,D and full text)
     user_answer = message_text.strip().upper()
     correct_answer = question.correct_answer.strip().upper()
-    is_correct = user_answer == correct_answer
+    
+    is_correct = False
+    
+    # Check if user answered with letter choice (A, B, C, D)
+    if user_answer in ['A', 'B', 'C', 'D'] and question.options:
+        letter_index = ord(user_answer) - ord('A')  # Convert A=0, B=1, C=2, D=3
+        if 0 <= letter_index < len(question.options):
+            selected_option = question.options[letter_index].strip().upper()
+            is_correct = selected_option == correct_answer
+    else:
+        # Check if user typed the full answer
+        is_correct = user_answer == correct_answer
     
     response_parts = []
     
@@ -81,7 +141,9 @@ def process_answer(phone_number, message_text):
             response_parts.append(f"\nNext: {next_question.text}")
             if next_question.options:
                 response_parts.append(next_question.get_options_text())
-            response_parts.append("\nReply with your answer!")
+                response_parts.append("\nReply with A, B, C, or D!")
+            else:
+                response_parts.append("\nReply with your answer!")
         else:
             response_parts.append("\n🎉 You've completed all questions! Great job!")
     
@@ -97,6 +159,7 @@ def process_answer(phone_number, message_text):
         response_parts.append(f"\nTry this: {question.text}")
         if question.options:
             response_parts.append(question.get_options_text())
+            response_parts.append("Reply with A, B, C, or D!")
     
     user.save()
     
@@ -124,9 +187,15 @@ def receive_sms(request):
         user, response_message, is_correct = process_answer(from_number, message)
         
         # Send SMS reply via Africa's Talking
+        sms_sent = False
         try:
-            sms_response = sms.send(response_message, [from_number])
-            print(f"SMS sent to {from_number}: {sms_response}")
+            sms_service = get_sms_service()
+            if sms_service:
+                sms_response = sms_service.send(response_message, [from_number])
+                print(f"SMS sent to {from_number}: {sms_response}")
+                sms_sent = True
+            else:
+                print(f"SMS service not available - response prepared for {from_number}")
         except Exception as sms_error:
             print(f"SMS sending failed: {sms_error}")
             # Continue processing even if SMS fails
@@ -136,7 +205,8 @@ def receive_sms(request):
             'user_score': user.score,
             'user_streak': user.streak,
             'is_correct': is_correct,
-            'response_sent': True
+            'response_sent': sms_sent,
+            'response_message': response_message  # Include response for testing
         })
     
     except Exception as e:
@@ -161,6 +231,7 @@ def leaderboard(request):
     return render(request, 'quiz/leaderboard.html', context)
 
 
+@csrf_exempt
 def start_quiz(request):
     """
     Helper endpoint to send first question to a phone number
@@ -178,14 +249,94 @@ def start_quiz(request):
                 message = f"Welcome to EduGame! 🎮\n\n{question.text}"
                 if question.options:
                     message += f"\n{question.get_options_text()}"
-                message += "\n\nReply with your answer!"
+                    message += "\n\nReply with A, B, C, or D!"
+                else:
+                    message += "\n\nReply with your answer!"
                 
                 try:
-                    sms_response = sms.send(message, [phone_number])
-                    return JsonResponse({'success': True, 'message': 'Quiz started!'})
+                    sms_service = get_sms_service()
+                    if sms_service:
+                        sms_response = sms_service.send(message, [phone_number])
+                        return JsonResponse({'success': True, 'message': 'Quiz started!'})
+                    else:
+                        return JsonResponse({'success': False, 'message': 'SMS service not available'})
                 except Exception as e:
                     return JsonResponse({'success': False, 'message': str(e)})
             
             return JsonResponse({'success': False, 'message': 'No questions available'})
+    
+    return JsonResponse({'success': False, 'message': 'POST method required'})
+
+
+def my_dashboard(request):
+    """
+    Personal dashboard showing your quiz progress
+    """
+    admin_phone = settings.ADMIN_PHONE_NUMBER
+    
+    # Get your user data
+    try:
+        user = User.objects.get(phone_number=admin_phone)
+    except User.DoesNotExist:
+        user = None
+    
+    # Get current question
+    current_question = None
+    if user and user.current_question_id:
+        try:
+            current_question = Question.objects.get(id=user.current_question_id)
+        except Question.DoesNotExist:
+            current_question = Question.objects.first()
+    
+    # Get all questions for progress tracking
+    all_questions = Question.objects.all().order_by('id')
+    total_questions = all_questions.count()
+    
+    # Calculate progress
+    progress_percentage = 0
+    if user and total_questions > 0:
+        completed = user.current_question_id - 1 if user.current_question_id > 1 else 0
+        progress_percentage = (completed / total_questions) * 100
+    
+    context = {
+        'user': user,
+        'admin_phone': admin_phone,
+        'current_question': current_question,
+        'all_questions': all_questions,
+        'total_questions': total_questions,
+        'progress_percentage': progress_percentage,
+        'leaderboard_users': User.objects.all().order_by('-score', '-updated_at')[:5],
+    }
+    
+    return render(request, 'quiz/dashboard.html', context)
+
+
+@csrf_exempt
+def test_sms_offline(request):
+    """
+    Test SMS functionality without actually sending SMS (for development)
+    """
+    if request.method == 'POST':
+        phone_number = request.POST.get('from', settings.ADMIN_PHONE_NUMBER)
+        message = request.POST.get('text', '')
+        
+        if not message:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Please provide a text message'
+            })
+        
+        # Process the answer using the same logic as SMS webhook
+        user, response_message, is_correct = process_answer(phone_number, message)
+        
+        return JsonResponse({
+            'success': True,
+            'user_score': user.score,
+            'user_streak': user.streak,
+            'is_correct': is_correct,
+            'response_message': response_message,
+            'phone_number': phone_number,
+            'test_mode': True
+        })
     
     return JsonResponse({'success': False, 'message': 'POST method required'})

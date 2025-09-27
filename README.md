@@ -4,6 +4,10 @@ A real-time SMS-based quiz game built with Django and Africa's Talking that upda
 
 *Part of the gamifications project - learning through gaming*
 
+## ⚠️ Important: WhatsApp Sandbox Issue
+
+**Africa's Talking WhatsApp sandbox is currently unavailable**, but this app only uses **SMS functionality**. You can safely ignore any WhatsApp-related errors - the app will work perfectly with SMS only!
+
 ## 🚀 Features
 
 - **Two-way SMS Integration** via Africa's Talking API
@@ -19,6 +23,7 @@ A real-time SMS-based quiz game built with Django and Africa's Talking that upda
 - Django 4.2+
 - Africa's Talking account (free sandbox available)
 - ngrok (for local webhook testing)
+- Your real phone number (for personalized testing)
 
 ## 🏗️ Project Structure
 
@@ -73,6 +78,7 @@ AT_USERNAME=your_africastalking_username
 AT_API_KEY=your_africastalking_api_key
 SECRET_KEY=your-secret-key-here
 DEBUG=True
+ADMIN_PHONE_NUMBER=+255628225468  # 👈 Replace with YOUR phone number
 ```
 
 ### 3. Setup Database
@@ -114,9 +120,41 @@ ngrok http 3000
 4. Set webhook URL to: `https://abc123.ngrok.io/receive_sms/`
 5. Save settings
 
+## 📱 Testing with Your Real Phone Number
+
+### 🎯 Quick Start with Your Number
+
+```powershell
+# Start quiz for your phone number
+python manage.py start_my_quiz
+
+# Or specify a different number
+python manage.py start_my_quiz --phone +254700123456
+```
+
+### 📊 Your Personal Dashboard
+
+Visit: `http://localhost:3000/dashboard/`
+
+- 📱 See your current progress and stats
+- 📝 View your current question  
+- 🏆 See where you rank on the leaderboard
+- 🧪 Test SMS answers directly from the web interface
+
 ## 📱 Testing the SMS Integration
 
-### Option 1: Using Africa's Talking Sandbox
+### 🧪 Testing Without SMS Service (No Credentials Needed)
+
+If you don't have Africa's Talking credentials yet, test the game logic:
+
+```powershell
+# Test POST request to simulate SMS
+curl -X POST http://localhost:3000/test_sms/ -d "from=+254700123456&text=MARS"
+```
+
+Or use the "🧪 Test Answer (No SMS)" button on the dashboard.
+
+### Option 1: Using Your Real Phone (Full Integration)
 
 1. Log into your Africa's Talking sandbox
 2. Send SMS from sandbox to your webhook

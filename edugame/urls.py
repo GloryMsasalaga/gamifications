@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.shortcuts import redirect
 
 def home_redirect(request):
-    return redirect('quiz:leaderboard')
+    return redirect('quiz:my_dashboard')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

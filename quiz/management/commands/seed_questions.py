@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from quiz.models import Question, User
 
 
@@ -15,39 +16,87 @@ class Command(BaseCommand):
         # Sample questions
         questions = [
             {
-                'text': 'What is the capital of Kenya?',
-                'correct_answer': 'NAIROBI',
-                'options': ['Nairobi', 'Mombasa', 'Kisumu', 'Eldoret'],
+                'text': 'What programming language is known as the "language of the web"?',
+                'correct_answer': 'JAVASCRIPT',
+                'options': ['Python', 'JavaScript', 'Java', 'C++'],
                 'difficulty_level': 1
             },
             {
-                'text': 'Which planet is known as the Red Planet?',
-                'correct_answer': 'MARS',
-                'options': ['Venus', 'Mars', 'Jupiter', 'Saturn'],
-                'difficulty_level': 1
-            },
-            {
-                'text': 'What is 15 + 27?',
-                'correct_answer': '42',
-                'options': ['40', '41', '42', '43'],
-                'difficulty_level': 1
-            },
-            {
-                'text': 'Who wrote the book "Things Fall Apart"?',
-                'correct_answer': 'CHINUA ACHEBE',
-                'options': ['Chinua Achebe', 'Wole Soyinka', 'Ngugi wa Thiongo', 'Chimamanda Adichie'],
+                'text': 'What is the capital city of Tanzania?',
+                'correct_answer': 'DODOMA',
+                'options': ['Dar es Salaam', 'Dodoma', 'Arusha', 'Mwanza'],
                 'difficulty_level': 2
             },
             {
-                'text': 'What is the largest mammal in the world?',
-                'correct_answer': 'BLUE WHALE',
-                'options': ['Elephant', 'Blue Whale', 'Giraffe', 'Rhinoceros'],
+                'text': 'What does AI stand for?',
+                'correct_answer': 'ARTIFICIAL INTELLIGENCE',
+                'options': ['Artificial Intelligence', 'Automated Interface', 'Advanced Integration', 'Applied Innovation'],
                 'difficulty_level': 1
             },
             {
-                'text': 'In which year did Kenya gain independence?',
-                'correct_answer': '1963',
-                'options': ['1960', '1963', '1965', '1970'],
+                'text': 'Which mountain is the highest peak in Africa?',
+                'correct_answer': 'MOUNT KILIMANJARO',
+                'options': ['Mount Kenya', 'Mount Kilimanjaro', 'Mount Elgon', 'Mount Meru'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'What does HTTP stand for?',
+                'correct_answer': 'HYPERTEXT TRANSFER PROTOCOL',
+                'options': ['HyperText Transfer Protocol', 'High Tech Transfer Process', 'HyperText Transmission Protocol', 'Hardware Transfer Text Protocol'],
+                'difficulty_level': 2
+            },
+            {
+                'text': 'Which is the largest lake in Africa?',
+                'correct_answer': 'LAKE VICTORIA',
+                'options': ['Lake Victoria', 'Lake Tanganyika', 'Lake Malawi', 'Lake Chad'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'In which year was Python programming language first released?',
+                'correct_answer': '1991',
+                'options': ['1989', '1991', '1995', '1998'],
+                'difficulty_level': 2
+            },
+            {
+                'text': 'What is the currency of Tanzania?',
+                'correct_answer': 'TANZANIAN SHILLING',
+                'options': ['Tanzanian Shilling', 'Tanzanian Dollar', 'East African Pound', 'Tanzanian Franc'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'Which company developed the Django web framework?',
+                'correct_answer': 'LAWRENCE JOURNAL-WORLD',
+                'options': ['Google', 'Facebook', 'Lawrence Journal-World', 'Microsoft'],
+                'difficulty_level': 3
+            },
+            {
+                'text': 'What does SMS stand for?',
+                'correct_answer': 'SHORT MESSAGE SERVICE',
+                'options': ['Simple Message System', 'Short Message Service', 'Swift Messaging Service', 'Secure Message Standard'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'Which African country hosted the 2010 FIFA World Cup?',
+                'correct_answer': 'SOUTH AFRICA',
+                'options': ['Nigeria', 'South Africa', 'Morocco', 'Egypt'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'Which is the largest city in Tanzania by population?',
+                'correct_answer': 'DAR ES SALAAM',
+                'options': ['Dodoma', 'Dar es Salaam', 'Mwanza', 'Arusha'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'What is the official language of Tanzania?',
+                'correct_answer': 'SWAHILI',
+                'options': ['English', 'Swahili', 'Arabic', 'French'],
+                'difficulty_level': 1
+            },
+            {
+                'text': 'Which national park in Tanzania is famous for the Great Migration?',
+                'correct_answer': 'SERENGETI',
+                'options': ['Ngorongoro', 'Serengeti', 'Tarangire', 'Ruaha'],
                 'difficulty_level': 2
             }
         ]
@@ -66,23 +115,19 @@ class Command(BaseCommand):
         # Create demo users for testing
         demo_users = [
             {
-                'phone_number': '+254700000001',
+                'phone_number': settings.ADMIN_PHONE_NUMBER,
                 'score': 50,
                 'streak': 2,
-                'badges': '🏅 First Steps, 🔥 Brainiac'
+                'badges': '🏅 First Steps, 🔥 Brainiac',
+                'current_question_id': 3
             },
-            {
-                'phone_number': '+254700000002', 
-                'score': 30,
-                'streak': 1,
-                'badges': '🏅 First Steps'
-            },
-            {
-                'phone_number': '+254700000003',
-                'score': 70,
-                'streak': 0,
-                'badges': '🏅 First Steps, 🔥 Brainiac, 🏆 Quiz Master'
-            }
+            # You can add more demo users if needed
+            # {
+            #     'phone_number': '+254700000002', 
+            #     'score': 30,
+            #     'streak': 1,
+            #     'badges': '🏅 First Steps'
+            # },
         ]
         
         demo_created = 0

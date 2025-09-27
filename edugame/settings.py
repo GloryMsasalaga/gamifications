@@ -127,6 +127,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Africa's Talking Configuration
+# Africa's Talking Configuration (SMS Only)
 AT_USERNAME = os.getenv('AT_USERNAME', 'sandbox')
 AT_API_KEY = os.getenv('AT_API_KEY', '')
+AT_SMS_ONLY = True  # Only use SMS service, avoid WhatsApp initialization issues
+
+# User Configuration
+# User Configuration
+ADMIN_PHONE_NUMBER = os.getenv('ADMIN_PHONE_NUMBER', '+255628225468')  # Your real phone number
